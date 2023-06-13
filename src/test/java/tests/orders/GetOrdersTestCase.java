@@ -4,6 +4,7 @@ import io.qameta.allure.junit4.DisplayName;
 import io.qameta.allure.junit4.Tag;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import services.Ingredients;
@@ -23,7 +24,7 @@ public class GetOrdersTestCase {
 
     private String accessToken;
 
-    private String createAndLoginUser(){
+    private String createAndLoginUser() {
         String username = RandomStringUtils.randomAlphabetic(10);
         String password = RandomStringUtils.randomAlphabetic(10);
         String email = RandomStringUtils.randomAlphabetic(5) + "@gmail.com";
@@ -34,10 +35,11 @@ public class GetOrdersTestCase {
     }
 
 
-
     @Before
     public void setUp() {
-        user = new User(); order = new Order(); ingredients = new Ingredients();
+        user = new User();
+        order = new Order();
+        ingredients = new Ingredients();
 
         accessToken = createAndLoginUser();
         Response responseIngredients = ingredients.getIngredients();
@@ -45,6 +47,7 @@ public class GetOrdersTestCase {
         order.createOrder(ingredients, accessToken);
 
     }
+
 
     @Tag("GetOrders")
     @Test
@@ -61,7 +64,7 @@ public class GetOrdersTestCase {
         assertEquals("Неверный код ответа", 200, response.statusCode());
         assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
         assertThat("Заказа не существует", response.path("orders"), notNullValue());
-        user.deleteUser(accessToken);
+
     }
 
     @Tag("GetOrders")
@@ -74,5 +77,10 @@ public class GetOrdersTestCase {
         assertEquals("Неверный код ответа", 401, response.statusCode());
         assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
         assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
+    }
+
+    @After
+    public void tearDown() {
+        User.deleteUser(accessToken);
     }
 }

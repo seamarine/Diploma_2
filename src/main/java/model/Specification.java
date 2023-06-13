@@ -5,12 +5,14 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
 public class Specification {
+    private static final String BASE_URI = "https://stellarburgers.nomoreparties.site/";
 
-        public RequestSpecification getBaseSpec(){return new RequestSpecBuilder()
+    public static RequestSpecification getBaseSpec() {
+        return new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
-                .setBaseUri("https://stellarburgers.nomoreparties.site/")
+                .setBaseUri(BASE_URI)
                 .build();
-        }
+    }
 
 
 }

@@ -4,6 +4,7 @@ import io.qameta.allure.junit4.DisplayName;
 import io.qameta.allure.junit4.Tag;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import services.User;
@@ -15,10 +16,14 @@ import static org.junit.Assert.assertEquals;
 
 public class EditUserTestCase {
 
-    private  User user;
-    private void login(String email, String password){user.loginUser(email, password);}
+    private User user;
+    private String token;
 
-    private Map<String, String> create(){
+    private void login(String email, String password) {
+        user.loginUser(email, password);
+    }
+
+    private Map<String, String> create() {
         String username = RandomStringUtils.randomAlphabetic(10);
         String password = RandomStringUtils.randomAlphabetic(10);
         String email = RandomStringUtils.randomAlphabetic(5) + "@gmail.com";
@@ -34,7 +39,8 @@ public class EditUserTestCase {
 
     @Before
     public void setUp() {
-        user = new User();}
+        user = new User();
+    }
 
     @Tag("EditUser")
     @Test
@@ -48,7 +54,7 @@ public class EditUserTestCase {
         String token = data.get("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
         assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
-        user.deleteUser(token);
+
     }
 
     @Tag("EditUser")
@@ -63,7 +69,7 @@ public class EditUserTestCase {
         String token = data.get("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
         assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
-        user.deleteUser(token);
+
 
     }
 
@@ -79,7 +85,7 @@ public class EditUserTestCase {
         String token = data.get("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
         assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
-        user.deleteUser(token);
+
 
     }
 
@@ -93,13 +99,10 @@ public class EditUserTestCase {
         String newUsername = RandomStringUtils.randomAlphabetic(10);
         Response response = user.editUser(data.get("email"), data.get("password"), newUsername, "");
         String token = data.get("accessToken");
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 401, response.statusCode());
             assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
             assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
-        } else{
-            user.deleteUser(token);
         }
     }
 
@@ -113,13 +116,10 @@ public class EditUserTestCase {
         String newPassword = RandomStringUtils.randomAlphabetic(10);
         Response response = user.editUser(data.get("email"), newPassword, data.get("name"), "");
         String token = data.get("accessToken");
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 401, response.statusCode());
             assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
             assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
-        } else{
-            user.deleteUser(token);
         }
     }
 
@@ -133,12 +133,15 @@ public class EditUserTestCase {
         String newEmail = RandomStringUtils.randomAlphabetic(5) + "@gmail.com";
         Response response = user.editUser(newEmail, data.get("password"), data.get("name"), "");
         String token = data.get("accessToken");
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 401, response.statusCode());
             assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
             assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
-        } else{
+        }
+    }
+    @After
+    public void tearDown(){
+        if(token!=null) {
             user.deleteUser(token);
         }
     }

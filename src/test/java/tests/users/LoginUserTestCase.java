@@ -4,6 +4,7 @@ import io.qameta.allure.junit4.DisplayName;
 import io.qameta.allure.junit4.Tag;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import services.User;
@@ -16,8 +17,9 @@ import static org.junit.Assert.assertEquals;
 public class LoginUserTestCase {
 
     private User user;
+    private String token;
 
-    private Map<String, String> create(){
+    private Map<String, String> create() {
         String username = RandomStringUtils.randomAlphabetic(10);
         String password = RandomStringUtils.randomAlphabetic(10);
         String email = RandomStringUtils.randomAlphabetic(5) + "@gmail.com";
@@ -44,12 +46,9 @@ public class LoginUserTestCase {
         Map<String, String> data = create();
         Response response = user.loginUser(data.get("email"), data.get("password"));
         String token = response.path("accessToken");
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 200, response.statusCode());
             assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
-        } else{
-            user.deleteUser(token);
         }
 
     }
@@ -62,12 +61,15 @@ public class LoginUserTestCase {
         Map<String, String> data = create();
         Response response = user.loginUser(data.get("email"), "incorrect");
         String token = response.path("accessToken");
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 401, response.statusCode());
             assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
             assertEquals("Невалидные данные в ответе: message", "email or password are incorrect", response.path("message"));
-        } else{
+        }
+    }
+    @After
+    public void tearDown(){
+        if(token!=null) {
             user.deleteUser(token);
         }
     }

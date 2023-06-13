@@ -60,8 +60,8 @@ public class User extends Specification {
         return response;
     }
 
-    @Step ("Удалить пользователя.")
-    public ValidatableResponse deleteUser(String token) {
+    @Step("Удалить пользователя.")
+    public static ValidatableResponse deleteUser(String token) {
         ValidatableResponse response = given()
                 .header("Authorization", token)
                 .spec(getBaseSpec())

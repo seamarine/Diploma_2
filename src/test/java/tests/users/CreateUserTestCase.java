@@ -4,6 +4,7 @@ import io.qameta.allure.junit4.DisplayName;
 import io.qameta.allure.junit4.Tag;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import services.User;
@@ -16,8 +17,9 @@ import static org.junit.Assert.assertEquals;
 public class CreateUserTestCase {
 
     private User user;
+    private String token;
 
-    private Map<String,String> cred(){
+    private Map<String, String> cred() {
         String email = RandomStringUtils.randomAlphabetic(5) + "@gmail.com";
         String password = RandomStringUtils.randomAlphabetic(10);
         String username = RandomStringUtils.randomAlphabetic(10);
@@ -39,12 +41,12 @@ public class CreateUserTestCase {
     @DisplayName("Проверка создания уникального пользователя")
     public void checkCreationUniqueUser() {
 
-        Map<String,String> data = cred();
+        Map<String, String> data = cred();
         Response response = user.createUser(data.get("email"), data.get("password"), data.get("username"));
 
         String token = response.path("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        user.deleteUser(token);
+
     }
 
     @Tag("CreateUser")
@@ -52,16 +54,13 @@ public class CreateUserTestCase {
     @DisplayName("Проверка создания пользователя, который уже зарегистрирован")
     public void checkCreationUserThatAlreadyRegistered() {
 
-        Map<String,String> data = cred();
+        Map<String, String> data = cred();
         user.createUser(data.get("email"), data.get("password"), data.get("username"));
         Response response = user.createUser(data.get("email"), data.get("password"), data.get("username"));
         String token = response.path("accessToken");
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 403, response.statusCode());
             assertEquals("Невалидные данные в ответе: message", "User already exists", response.path("message"));
-        } else{
-            user.deleteUser(token);
         }
 
     }
@@ -71,15 +70,18 @@ public class CreateUserTestCase {
     @DisplayName("Проверка создания пользователя без заполнения одного из обязательных полей")
     public void checkUserCreationWithoutFillingInOneRequiredFields() {
 
-        Map<String,String> data = cred();
+        Map<String, String> data = cred();
         Response response = user.createUser(data.get("email"), data.get(""), data.get("username"));
         String token = response.path("accessToken");
 
-        if(token == null)
-        {
+        if (token == null) {
             assertEquals("Неверный код ответа", 403, response.statusCode());
             assertEquals("Невалидные данные в ответе: message", "Email, password and name are required fields", response.path("message"));
-        } else{
+        }
+    }
+    @After
+    public void tearDown(){
+        if(token!=null) {
             user.deleteUser(token);
         }
     }
